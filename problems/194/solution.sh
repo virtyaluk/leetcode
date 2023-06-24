@@ -1,0 +1,1 @@
+for i in $(seq 1 $(head -n1 file.txt | wc -w)); do echo $(cut -d' ' -f$i file.txt); done

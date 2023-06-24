@@ -1,0 +1,1 @@
+tr ' ' '\n' < words.txt | grep -E '^[a-z]+$' | sort | uniq -c | sort -n -r | awk '{print $2, $1}'
