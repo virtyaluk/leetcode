@@ -7,4 +7,4 @@ class Solution:
                 if i != j and words[i] in words[j]:
                     res.add(words[i])
         
-        return res
+        return list(res)
