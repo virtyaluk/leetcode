@@ -1,36 +1,34 @@
 class Solution {
-public:
-    int maxValue(vector<vector<int>>& events, int k) {
-        unordered_map<string, int> dp;
-        
-        sort(begin(events), end(events));
-        
-        return dfs(dp, events, k, 0, 0);
-    }
-    
-    int dfs(
-        unordered_map<string, int>& dp,
-        vector<vector<int>>& events,
-        int k,
-        int lastEnd,
-        int j
-    ) {
-        if (not k or j >= size(events)) {
+private:
+    vector<vector<int>> dp;
+
+    int dfs(int curIdx, int cnt, int prev, vector<vector<int>>& events, int k) {
+        if (curIdx == size(events) or cnt == k) {
             return 0;
         }
-        
-        string key = to_string(k) + "_" + to_string(lastEnd);
-        
-        if (dp.count(key)) {
-            return dp[key];
+
+        if (prev >= events[curIdx].front()) {
+            return dfs(curIdx + 1, cnt, prev, events, k);
         }
-        
-        int ans = dfs(dp, events, k, lastEnd, j + 1);
-        
-        if (events[j][0] > lastEnd) {
-            ans = max(ans, events[j][2] + dfs(dp, events, k - 1, events[j][1], j + 1));
+
+        if (dp[cnt][curIdx] != -1) {
+            return dp[cnt][curIdx];
         }
-        
-        return dp[key] = ans;
+
+        int ans = max(
+            dfs(curIdx + 1, cnt, prev, events, k),
+            dfs(curIdx + 1, cnt + 1, events[curIdx][1], events, k) + events[curIdx][2]
+        );
+
+        dp[cnt][curIdx] = ans;
+
+        return ans;
+    }
+public:
+    int maxValue(vector<vector<int>>& events, int k) {
+        sort(begin(events), end(events));
+        dp = vector<vector<int>>(k + 1, vector<int>(size(events), -1));
+
+        return dfs(0, 0, -1, events, k);
     }
 };

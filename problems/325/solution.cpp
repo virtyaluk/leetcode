@@ -1,8 +1,9 @@
 class Solution {
 public:
     int maxSubArrayLen(vector<int>& nums, int k) {
-        int ans = 0, sum = 0;
-        unordered_map<int, int> m;
+        int ans = 0;
+        long long sum = 0;
+        unordered_map<long long, int> m;
         
         for (int i = 0; i < nums.size(); i++) {
             sum += nums[i];
