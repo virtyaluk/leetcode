@@ -1,44 +1,88 @@
+class UnionFind {
+private:
+    vector<int> parent;
+    vector<int> rank;
+
+public:
+    UnionFind(int n) {
+        parent.resize(n);
+        rank.resize(n);
+        iota(begin(parent), end(parent), 0);
+    }
+
+    int find(int x) {
+        if (parent[x] != x) {
+            parent[x] = find(parent[x]);
+        }
+
+        return parent[x];
+    }
+
+    void unite(int x, int y) {
+        int px = find(x),
+            py = find(y);
+        
+        if (px != py) {
+            if (rank[px] > rank[py]) {
+                parent[py] = px;
+            } else if (rank[px] < rank[py]) {
+                parent[px] = py;
+            } else {
+                parent[py] = px;
+                rank[px]++;
+            }
+        }
+    }
+
+    bool connected(int x, int y) {
+        return find(x) == find(y);
+    }
+
+    void reset(int x) {
+        parent[x] = x;
+        rank[x] = 0;
+    }
+};
+
 class Solution {
 public:
     vector<int> findAllPeople(int n, vector<vector<int>>& meetings, int firstPerson) {
-        vector<vector<pair<int, int>>> g(n);
-        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
-        vector<int> dist(n, INT_MAX);
-        unordered_set<int> ans;
-        
-        for (int i = 0; i < size(meetings); i++) {
-            int xi = meetings[i][0],
-                yi = meetings[i][1],
-                timei = meetings[i][2];
-            
-            g[xi].push_back({yi, timei});
-            g[yi].push_back({xi, timei});
+        vector<int> ans;
+        map<int, vector<pair<int, int>>> stm;
+        UnionFind g(n);
+
+        g.unite(firstPerson, 0);
+
+        sort(begin(meetings), end(meetings), [](auto& lhs, auto& rhs) {
+            return lhs[2] < rhs[2];
+        });
+
+        for (auto& m: meetings) {
+            int x = m[0],
+                y = m[1],
+                t = m[2];
+            stm[t].emplace_back(x, y);
         }
-        
-        dist[0] = 0;
-        dist[firstPerson] = 0;
-        pq.push({0, 0});
-        ans.insert(0);
-        ans.insert(firstPerson);
-        
-        if (firstPerson != 0) {
-            pq.push({0, firstPerson});
-        }
-        
-        while (not empty(pq)) {
-            auto [d, u] = pq.top();
-            pq.pop();
-            
-            ans.insert(u);
-            
-            for (auto [v, vd]: g[u]) {
-                if (dist[v] > d and vd >= d and ans.find(v) == end(ans)) {
-                    pq.push({vd, v});
-                    dist[v] = vd;
+
+        for (auto& [_, ms]: stm) {
+            for (auto& [x, y]: ms) {
+                g.unite(x, y);
+            }
+
+            for (auto& [x, y]: ms) {
+                if (not g.connected(x, 0)) {
+                    g.reset(x);
+                    g.reset(y);
                 }
             }
         }
-        
-        return {begin(ans), end(ans)};
+
+        for (int i = 0; i < n; i++) {
+            if (g.connected(i, 0)) {
+                ans.push_back(i);
+            }
+        }
+
+        return ans;
     }
 };

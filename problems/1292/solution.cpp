@@ -1,68 +1,36 @@
 class Solution {
+private:
+    int getRect(const vector<vector<int>>& P, int x1, int y1, int x2, int y2) {
+        return P[x2][y2] - P[x1 - 1][y2] - P[x2][y1 - 1] + P[x1 - 1][y1 - 1];
+    }
 public:
     int maxSideLength(vector<vector<int>>& mat, int threshold) {
         int m = size(mat),
-            n = size(mat.back()),
-            lo = 0,
-            hi = min(m, n),
+            n = size(mat.front()),
+            r = min(m, n),
             ans = 0;
-        vector<vector<int>> dp(m, vector<int>(n));
+        vector<vector<int>> P(m + 1, vector<int>(n + 1));
         
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                dp[i][j] = mat[i][j];
-                
-                if (i) {
-                    dp[i][j] += dp[i - 1][j];
-                }
-                
-                if (j) {
-                    dp[i][j] += dp[i][j - 1];
-                }
-                
-                if (i and j) {
-                    dp[i][j] -= dp[i - 1][j - 1];
+        for (int i = 1; i <= m; ++i) {
+            for (int j = 1; j <= n; ++j) {
+                P[i][j] = P[i - 1][j] + P[i][j - 1] - P[i - 1][j - 1] +
+                          mat[i - 1][j - 1];
+            }
+        }
+
+        for (int i = 1; i <= m; ++i) {
+            for (int j = 1; j <= n; ++j) {
+                for (int c = ans + 1; c <= r; ++c) {
+                    if (i + c - 1 <= m && j + c - 1 <= n &&
+                        getRect(P, i, j, i + c - 1, j + c - 1) <= threshold) {
+                        ++ans;
+                    } else {
+                        break;
+                    }
                 }
             }
         }
-        
-        while (lo <= hi) {
-            int mid = lo + (hi - lo) / 2;
-            
-            if (check(dp, mid, threshold)) {
-                ans = mid;
-                lo = mid + 1;
-            } else {
-                hi = mid -1;
-            }
-        }
-        
-        return ans;
-    }
     
-    bool check(vector<vector<int>>& dp, int k, int t) {
-        for (int i = k - 1; i < size(dp); i++) {
-            for (int j = k - 1; j < size(dp.back()); j++) {
-                int sum = dp[i][j];
-                
-                if (i - k >= 0) {
-                    sum -= dp[i - k][j];
-                }
-                
-                if (j - k >= 0) {
-                    sum -= dp[i][j - k];
-                }
-                
-                if (i - k >= 0 and j - k >= 0) {
-                    sum += dp[i - k][j - k];
-                }
-                
-                if (sum <= t) {
-                    return true;
-                }
-            }
-        }
-        
-        return false;
+        return ans;
     }
 };
