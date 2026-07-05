@@ -1,0 +1,62 @@
+class Robot {
+private:
+    bool moved = false;
+    int idx = 0;
+    vector<pair<int, int>> pos;
+    vector<int> dir;
+    unordered_map<int, string> toDir = {
+        {0, "East"},
+        {1, "North"},
+        {2, "West"},
+        {3, "South"}
+    };
+public:
+    Robot(int width, int height) {
+        for (int i = 0; i < width; i++) {
+            pos.emplace_back(i, 0);
+            dir.emplace_back(0);
+        }
+
+        for (int i = 1; i < height; i++) {
+            pos.emplace_back(width - 1, i);
+            dir.emplace_back(1);
+        }
+
+        for (int i = width - 2; i >= 0; i--) {
+            pos.emplace_back(i, height - 1);
+            dir.emplace_back(2);
+        }
+
+        for (int i = height - 2; i > 0; i--) {
+            pos.emplace_back(0, i);
+            dir.emplace_back(3);
+        }
+
+        dir.front() = 3;
+    }
+    
+    void step(int num) {
+        moved = true;
+        idx = (idx + num) % size(pos);
+    }
+    
+    vector<int> getPos() {
+        return {pos[idx].first, pos[idx].second};
+    }
+    
+    string getDir() {
+        if (not moved) {
+            return "East";
+        }
+
+        return toDir[dir[idx]];
+    }
+};
+
+/**
+ * Your Robot object will be instantiated and called as such:
+ * Robot* obj = new Robot(width, height);
+ * obj->step(num);
+ * vector<int> param_2 = obj->getPos();
+ * string param_3 = obj->getDir();
+ */
